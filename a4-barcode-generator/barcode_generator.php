@@ -3,15 +3,14 @@
 Plugin Name: Barcode Label Printing for WooCommerce and others plugins - (demo)
 Description: Create and Print barcodes on label sheets using a printer. Best tool to make inventory of your stock.
 Text Domain: wpbcu-barcode-generator
-Version: 3.4.10
+Version: 3.4.11
 Author: UkrSolution
 Plugin URI: https://www.ukrsolution.com/Joomla/A4-BarCode-Generator-For-Wordpress
 Author URI: http://www.ukrsolution.com
 License: GPL2
 WC requires at least: 4.0.0
--WC tested up to: 9.1.*
+-WC tested up to: 9.4.*
  */
-
 
 
 if (!defined('ABSPATH')) {
@@ -64,9 +63,7 @@ else if ($load_on_frontend) {
 
 
 
-$a4bcConfig = require UkrSolution\ProductLabelsPrinting\Helpers\Variables::$A4B_PLUGIN_BASE_PATH . 'config/config.php';
-
-$ProductLabelsPrintingFrontend = new UkrSolution\ProductLabelsPrinting\Frontend($a4bcConfig);
+$ProductLabelsPrintingFrontend = new UkrSolution\ProductLabelsPrinting\Frontend();
 
 if (is_admin() || $load_on_frontend == true || $load_on_url == true) {
 
@@ -124,15 +121,19 @@ if (is_admin() || $load_on_frontend == true || $load_on_url == true) {
     }, 10, 6);
 
     add_action('plugins_loaded', function () {
-        $pluginRelPath = basename(dirname(__FILE__)) . '/languages';
-        load_plugin_textdomain('wpbcu-barcode-generator', false, $pluginRelPath);
 
         $pluginName = UkrSolution\ProductLabelsPrinting\Helpers\Variables::$A4B_PLUGIN_BASE_NAME;
+
         $lastVersion = get_option("active-print-barcodes-version", "");
-        if ($lastVersion !== "3.4.10") {
+        if ($lastVersion !== "3.4.11") {
             UkrSolution\ProductLabelsPrinting\Database::createTables();
-            update_option("active-print-barcodes-version", "3.4.10");
+            update_option("active-print-barcodes-version", "3.4.11");
         }
+    });
+
+    add_action('init', function () {
+        $pluginRelPath = basename(dirname(__FILE__)) . '/languages';
+        load_plugin_textdomain('wpbcu-barcode-generator', false, $pluginRelPath);
     });
 
     add_action('admin_notices', function () {
@@ -167,6 +168,6 @@ if (is_admin() || $load_on_frontend == true || $load_on_url == true) {
     add_action('admin_init', 'uswbg_a4bOldPostInitialization');
 
 
-    $ProductLabelsPrintingCore = new UkrSolution\ProductLabelsPrinting\Core($a4bcConfig);
+    $ProductLabelsPrintingCore = new UkrSolution\ProductLabelsPrinting\Core();
 
 }

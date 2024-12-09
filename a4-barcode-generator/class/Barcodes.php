@@ -5,6 +5,7 @@ namespace UkrSolution\ProductLabelsPrinting;
 use Melgrati\CodeValidator\CodeValidator;
 use UkrSolution\ProductLabelsPrinting\Generators\Generator;
 use UkrSolution\ProductLabelsPrinting\Generators\BarcodeImage;
+use UkrSolution\ProductLabelsPrinting\Helpers\UserSettings;
 
 class Barcodes
 {
@@ -34,7 +35,7 @@ class Barcodes
 
     public function generateXml($data)
     {
-        $w = $h = 500;
+        $w = $h = intval(UserSettings::getOption('barcodeSizePx', 500));
 
         $withoutFile = true;
 
@@ -149,7 +150,7 @@ class Barcodes
                 }
                 break;
             case 'C128': 
-                $patern = '/^[ -~]+$/';
+                $patern = '/^[\x00-\x7F]+$/'; 
                 $validData['is_valid'] = preg_match($patern, $code);
                 if (!$validData['is_valid']) {
                     $msg = __("%field% field contains incorrect data \"%code%\". Code 128 supports alphanumeric or numeric-only barcodes. It can encode all 128 characters of ASCII encoding.", 'wpbcu-barcode-generator');

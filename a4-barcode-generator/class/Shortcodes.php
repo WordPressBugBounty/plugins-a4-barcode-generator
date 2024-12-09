@@ -37,8 +37,8 @@ class Shortcodes
         $shortcode = $this->prepareShortcodeMatching($shortcode);
 
         if (isset($attributes['class']) && is_product()) {
-            wp_enqueue_style('product-barcode', Variables::$A4B_PLUGIN_BASE_URL . 'assets/css/style-3.4.10-cad6b5ba.css', array());
-            wp_enqueue_script('product-barcode-js', Variables::$A4B_PLUGIN_BASE_URL . 'assets/js/barcodes-core-3.4.10-cad6b5ba.js', array('jquery'), null, true);
+            wp_enqueue_style('product-barcode', Variables::$A4B_PLUGIN_BASE_URL . 'assets/css/style-3.4.11-f114ea43.css', array());
+            wp_enqueue_script('product-barcode-js', Variables::$A4B_PLUGIN_BASE_URL . 'assets/js/barcodes-core-3.4.11-f114ea43.js', array('jquery'), null, true);
 
             wp_localize_script('product-barcode-js', 'digitalBarcodeJS', array(
                 'ajaxUrl' => get_admin_url() . 'admin-ajax.php',

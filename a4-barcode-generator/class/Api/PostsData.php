@@ -16,7 +16,7 @@ class PostsData
             wp_die();
         }
 
-        $validationRules = array('list' => 'array', 'raw' => 'complexCodeValue');
+        $validationRules = array('list' => 'array', 'raw' => 'complexCodeValue', 'fieldSource' => 'string');
         $post = array();
         $result = array();
 
@@ -26,6 +26,11 @@ class PostsData
         if (isset($_POST['raw'])) {
             $post['raw'] = sanitize_textarea_field($_POST['raw']);
         }
+        if (isset($_POST['fieldSource'])) {
+            $post['fieldSource'] = sanitize_text_field($_POST['fieldSource']);
+        } else {
+            $post['fieldSource'] = '';
+        }
 
         $data = Validator::create($post, $validationRules, true)->validate();
 
@@ -34,7 +39,7 @@ class PostsData
         $postsUtils = new PostsUtils();
         foreach ($data['list'] as &$postField) {
             unset($postField['success']);
-            $result[] = $postsUtils->getPostIdByField($postField);
+            $result[] = $postsUtils->getPostIdByField($postField, $data['fieldSource']);
         }
 
         uswbg_a4bJsonResponse($result);

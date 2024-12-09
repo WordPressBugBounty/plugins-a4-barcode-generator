@@ -6,12 +6,8 @@ use UkrSolution\ProductLabelsPrinting\Cart\BarcodeCart;
 
 class Frontend
 {
-    protected $config;
-
-    public function __construct($config)
+    public function __construct()
     {
-        $this->config = $config;
-
         add_action('init', array($this, "parseURL"));
     }
 

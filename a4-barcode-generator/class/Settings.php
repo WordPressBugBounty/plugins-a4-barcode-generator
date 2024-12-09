@@ -168,30 +168,79 @@ class Settings
             wp_die();
         }
 
-        global $wpdb;
+        $keys = array(
+            "paper_sheet",
+            "product_paper_sheet",
+            "order_paper_sheet",
+            "settings_wizard",
+        );
+
+        if (current_user_can('manage_options')) {
+            $generalSettingsKeys = array(
+                "lk",
+                "lken",
+                "settings-type",
+                "codePrefix",
+                "cfPriority",
+                "currencySymbol",
+                "productShortcode", 
+                "orderShortcode", 
+
+                "barcodeSizePx",
+                "lwhFormat",
+                "search_attributes",
+                "customCheckboxSelector",
+                "customButtonSelector",
+                "dokanFronProductPage",
+                "defaultProfile",
+                "defaultProductProfile",
+                "defaultOrderProfile",
+                "attrPriority",
+                "customField",
+                "customFieldLabel",
+                "customFieldName",
+                "fieldNameL1",
+                "fieldNameL2",
+                "fieldNameL3",
+                "fieldNameL4",
+                "attributeIsntSpec",
+                "gridOnPrint",
+                "disableCreationOrderItems",
+                "jszipCompression",
+                "clearProfileLabels",
+                "clearLabelsBeforeCreateNew",
+                "dimensionId",
+                "excludedProdStatuses",
+
+                "barcodesOnProductPageParams",
+                "sectionsParams",
+                "orderBarcodeEmailParams",
+                "productBarcodeEmailParams",
+                "adminProductPageParams",
+                "adminOrderPageParams",
+                "adminOrderItemPageParams",
+                "adminOrderPreviewParams",
+                "wc_pdf_ips_order_hook_params",
+                "wc_pdf_ips_product_hook_params",
+                "wc_pdf_ips_status",
+                "booster_for_wc",
+                "productField",
+                "removeDomainBarcodeUrl",
+                "disableBrowserCache",
+                "productPageShortcode",
+                "adminProductShortcode",
+            );
+
+            $keys = array_merge($keys, $generalSettingsKeys);
+        }
 
         if (empty($data)) {
-            $keys = array(
-                "settings-type",
-                "productPageShortcode", "adminProductShortcode",
-                "lwhFormat", "defaultProfile", "defaultProductProfile", "defaultOrderProfile", "cfPriority", "attrPriority", "currencySymbol",
-                "fieldNameL1", "fieldNameL2", "fieldNameL3", "fieldNameL4",
-                "attributeIsntSpec", "gridOnPrint", "clearProfileLabels", "dimensionId", "lk", "lken", "excludedProdStatuses", "disableCreationOrderItems",
-                "codePrefix", "productField", "jszipCompression",
-                "sectionsParams",
-                "barcodesOnProductPageParams",
-                "productBarcodeEmailParams", "orderBarcodeEmailParams",
-                "adminProductPageParams", "adminOrderPageParams", "adminOrderItemPageParams", "adminOrderPreviewParams", "adminOrderPreviewParams",
-                "wc_pdf_ips_product_hook_params", "wc_pdf_ips_order_hook_params",
-                "productShortcode", "orderShortcode",
-                "paper_sheet", "product_paper_sheet", "order_paper_sheet", "settings_wizard", "customCheckboxSelector", "customButtonSelector",
-                "wc_pdf_ips_status", "booster_for_wc", "dokanFronProductPage",
-                "removeDomainBarcodeUrl", "disableBrowserCache",
-                "customField", "customFieldLabel", "customFieldName"
-            );
+
+
             $data = (new Sanitize())::getData($keys);
         }
 
+        global $wpdb;
         $tableUserSettings = $wpdb->prefix . Database::$tableUserSettings;
         $userId = get_current_user_id();
 
@@ -208,7 +257,7 @@ class Settings
 
             if (isset($data['lken'])) {
                 $prefix = 'ukrsolution_upgrade_print_barcodes_';
-                @delete_transient($prefix . '3.4.10');
+                @delete_transient($prefix . '3.4.11');
             }
 
             foreach ($data as $param => $value) {

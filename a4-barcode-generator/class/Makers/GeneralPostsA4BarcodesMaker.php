@@ -28,7 +28,7 @@ abstract class GeneralPostsA4BarcodesMaker extends A4BarcodesMaker
         "current-date-time" => "Current date time",
     );
 
-    public function __construct($data, string $type = '')
+    public function __construct($data, $type = '')
     {
         parent::__construct($data, $type);
         if (is_plugin_active('woocommerce/woocommerce.php')) {

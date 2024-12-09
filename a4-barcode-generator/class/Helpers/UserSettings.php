@@ -86,6 +86,8 @@ class UserSettings
             }
 
             if (!isset($result['lwhFormat'])) $result['lwhFormat'] = '%L x %W x %H';
+            if (!isset($result['search_attributes'])) $result['search_attributes'] = '';
+            if (!isset($result['barcodeSizePx'])) $result['barcodeSizePx'] = 500;
 
             if (!isset($result['customCheckboxSelector'])) {
                 $result['customCheckboxSelector'] = 'input.barcode-products-selector';
@@ -101,6 +103,10 @@ class UserSettings
 
             if (!isset($result['clearProfileLabels'])) {
                 $result['clearProfileLabels'] = 1;
+            }
+
+            if (!isset($result['clearLabelsBeforeCreateNew'])) {
+                $result['clearLabelsBeforeCreateNew'] = "";
             }
 
             if (!isset($result['excludedProdStatuses'])) {

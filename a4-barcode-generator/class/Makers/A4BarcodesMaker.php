@@ -377,6 +377,7 @@ abstract class A4BarcodesMaker
             'pickup-date',
             'product-store-link',
             'permalink_admin',
+            'order-item-consequential-number',
 
             'order-shipping-first-name',
             'order-shipping-last-name',
@@ -463,7 +464,9 @@ abstract class A4BarcodesMaker
 
             'product_image_url',
             'main_gallery',
+            'product-all-parent-attributes',
             'variation-all-attr',
+            'product-all-attr',
             'product_id_prefix',
 
             'atum-order-id',
@@ -491,6 +494,8 @@ abstract class A4BarcodesMaker
             'yoast-gtin13-ean',
             'yoast-gtin14-itf14',
             'yoast-mpn',
+
+            'woo-booking_item-booking-date',
         );
 
         $shortcodesTagsList = apply_filters('barcode_generator_register_shortcodes_hook', $shortcodesTagsList);

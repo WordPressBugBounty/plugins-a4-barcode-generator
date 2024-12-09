@@ -17,7 +17,7 @@ class Updater
         add_action('init', function () {
             try {
                 $generalSettings = UserSettings::getGeneral();
-                $plugin_current_version = '3.4.10';
+                $plugin_current_version = '3.4.11';
                 $plugin_slug = Variables::$A4B_PLUGIN_BASE_NAME;
                 $plugin_remote_path = 'https://www.ukrsolution.com/CheckUpdates/BarcodesForWordpressV3.json';
                 $license_user = '3713f12c2a10242bab12a361bcac2ade';
