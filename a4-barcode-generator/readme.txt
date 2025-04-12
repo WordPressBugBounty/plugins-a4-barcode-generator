@@ -212,6 +212,11 @@ Sure, this option available on the settings page.
 
 Yes, our plugin supports this option which you can find on the "custom template" page (the [code] value tab).
 
+= How can I report security bugs?
+
+You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/wordpress/plugin/a4-barcode-generator/vdp)
+
+
 == Screenshots ==
 
 1. The first start wizard, select your printer/paper type (A4).
