@@ -136,10 +136,23 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
 
         if ($this->type === "orders") {
             $this->items = $this->getItemsByOrders();
+
+            if (!empty($this->data['existingIds'])) {
+                $this->data['ordersIds'] = $this->data['existingIds'];
+                $existingItems = $this->getItemsByOrders();
+            }
         } elseif ($this->type === "order-products") {
             $this->items = $this->getItemsByOrderProducts();
+
+            if (!empty($this->data['existingIds'])) {
+                $existingItems = uswbg_a4bGetPosts(array('post__in' => $this->data['existingIds'], 'post_type' => array('product', 'product_variation')));
+            }
         } elseif ($this->type === "products") {
             $this->items = $this->getItemsByProducts();
+
+            if (!empty($this->data['existingIds'])) {
+                $existingItems = uswbg_a4bGetPosts(array('post__in' => $this->data['existingIds'], 'post_type' => array('product', 'product_variation')));
+            }
         } elseif ($this->type === "atum-po-order-products") {
             $this->items = $this->getItemsByAtumPoOrderProducts();
         } elseif ($isAppointment) {
@@ -147,13 +160,57 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
         } else {
             $getItemsMethod = $this->getItemsMethods[$forCategories][$withVariations];
             $this->items = $this->$getItemsMethod();
+
+            if (!empty($this->data['existingIds'])) {
+                $existingItems = uswbg_a4bGetPosts(array('post__in' => $this->data['existingIds'], 'post_type' => array('product', 'product_variation')));
+            }
+        }
+
+        if (!empty($this->data['sortAlphabetically']) && '1' === $this->data['sortAlphabetically']) {
+
+            if (!empty($this->data['existingIds']) && !empty($existingItems)) {
+                $this->items = array_merge(
+                    $this->duplicatePostsByGivenIds(
+                        $existingItems,
+                        $this->data['existingIds']
+                    ),
+                    $this->items
+                );
+            }
+
+            $this->items = $this->sortByTitle($this->items);
         }
 
     }
 
+    protected function duplicatePostsByGivenIds($posts, $ids, $field = 'ID')
+    {
+        $counts = array_count_values($ids);
+
+        $objectMap = [];
+        foreach ($posts as $object) {
+            $objectMap[$object->$field][] = $object;
+        }
+
+        $newObjects = $posts;
+
+        foreach ($counts as $value => $requiredCount) {
+            if (isset($objectMap[$value])) {
+                $existingCount = count($objectMap[$value]);
+                while ($existingCount < $requiredCount) {
+                    $duplicate = $objectMap[$value][0]; 
+                    $newObjects[] = $duplicate;
+                    $existingCount++;
+                }
+            }
+        }
+
+        return $newObjects;
+    }
+
     protected function getItemsForCategoriesWithVariations()
     {
-        $productsCategories = isset($this->data['productsCategories']) ? $this->data['productsCategories'] : null;
+        $productsCategories = isset($this->data['productsCategories']) ? $this->data['productsCategories'] : array();
 
         $products = $this->getProductsByCategoriesFilteredByProductsStatus($productsCategories);
         $variations = uswbg_a4bGetPosts(array('post_type' => 'product_variation', 'post_parent__in' => uswbg_a4bObjectsFieldToArray($products, 'ID')));
@@ -165,7 +222,7 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
 
     protected function getItemsForCategories()
     {
-        $productsCategories = isset($this->data['productsCategories']) ? $this->data['productsCategories'] : null;
+        $productsCategories = isset($this->data['productsCategories']) ? $this->data['productsCategories'] : array();
 
         return $this->getProductsByCategoriesFilteredByProductsStatus($productsCategories);
     }
@@ -182,15 +239,13 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
                 'post__in' =>  $productsIds,
                 'fields' => 'id=>parent',
             ));
+
             $parentsIdsOfVariationsByGivenProductsIds = wp_list_pluck($variationsByGivenProductsIds, 'post_parent');
             $actualProductsIdsOfVariationsByGivenProductsIds = uswbg_a4bGetPosts(array(
                 'post_type' => 'product',
                 'post_status' => array('publish', 'pending', 'draft', 'future', 'private', 'inherit', 'trash'),
                 'post__in' => empty($parentsIdsOfVariationsByGivenProductsIds) ? array(0) : array_values($parentsIdsOfVariationsByGivenProductsIds),
-                'posts_per_page' => -1,
                 'fields' => 'ids',
-                'suppress_filters' => true,
-                'lang' => 'all',
             ));
 
             if (!empty($variationsByGivenProductsIds) && !empty($actualProductsIdsOfVariationsByGivenProductsIds)) {
@@ -224,11 +279,11 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
 
     protected function getItemsForProducts()
     {
-        $productsIds = isset($this->data['productsIds']) ? $this->data['productsIds'] : null;
+        $productsIds = isset($this->data['productsIds']) ? $this->data['productsIds'] : array();
         $importType = isset($this->data["isImportSingleVariation"]) ? $this->data["isImportSingleVariation"] : "";
 
         if ($importType === "variation") {
-            $products = uswbg_a4bGetPosts(array('post__in' => $productsIds, 'post_type' => 'product_variation'));
+            $products = uswbg_a4bGetPosts(array('post__in' => !empty($productsIds) ? $productsIds : array(0), 'post_type' => 'product_variation'));
         } else {
             $products = $this->getProductsByIdsFilteredByProductsStatus($productsIds);
         }
@@ -238,12 +293,12 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
 
     protected function getItemsByProducts()
     {
-        $productsIds = isset($this->data['productsIds']) ? $this->data['productsIds'] : null;
+        $productsIds = isset($this->data['productsIds']) ? $this->data['productsIds'] : array();
 
         $onlySelectedVariations = !empty($productsIds)
             ? uswbg_a4bGetPosts(array(
                 'post_type'       => 'product_variation',
-                'post__in' => $productsIds,
+                'post__in' => !empty($productsIds) ? $productsIds : array(0),
             ))
             : array();
 
@@ -270,7 +325,7 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
 
     protected function getProductsByIdsFilteredByProductsStatus($productsIds)
     {
-        $products = uswbg_a4bGetPosts(array('post__in' => $productsIds));
+        $products = uswbg_a4bGetPosts(array('post__in' => !empty($productsIds) ? $productsIds : array(0)));
 
         $productsExcludedByStatus = !empty($this->excludedProdStatusesArr)
             ? uswbg_a4bGetPosts(array(
@@ -285,7 +340,7 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
     protected function getVariableProductsByIdsFilteredByProductsStatus($productsIds)
     {
         $products = uswbg_a4bGetPosts(array(
-            'post__in' => $productsIds,
+            'post__in' => !empty($productsIds) ? $productsIds : array(0),
             'tax_query' => array(
                 array(
                     'taxonomy' => 'product_type',
@@ -323,7 +378,7 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
         $productsWithGivenCategories = uswbg_a4bGetPostsByCategories($productsCategories);
 
         $productsExcludedByStatus = !empty(UserSettings::getOption('excludedProdStatuses'))
-            ? uswbg_a4bGetPostsByCategories($productsCategories, explode(',', UserSettings::getOption('excludedProdStatuses')))
+            ? uswbg_a4bGetPostsByCategories($productsCategories, array('post_status' => explode(',', UserSettings::getOption('excludedProdStatuses'))))
             : array();
 
         return uswbg_a4bExcludePostsByIds($productsWithGivenCategories, uswbg_a4bObjectsFieldToArray($productsExcludedByStatus, 'ID'));
@@ -403,8 +458,17 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
                 'orderby' => 'post__in',
             ));
 
+            $orderSimpleProducts = uswbg_a4bGetPosts(array(
+                'post_type' => 'any',
+                'post__in' => empty($itemIdToProductIdMap) ? array(0) : array_values($itemIdToProductIdMap), 
+                'orderby' => 'post__in',
+            ));
+
             $orderProductsIndexedByPostId = array();
             foreach ($orderProducts as $orderProduct) {
+                $orderProductsIndexedByPostId[$orderProduct->ID] = $orderProduct;
+            }
+            foreach ($orderSimpleProducts as $orderProduct) {
                 $orderProductsIndexedByPostId[$orderProduct->ID] = $orderProduct;
             }
 
@@ -825,6 +889,13 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
             case 'variation-all-attr':
                 $value = $this->getVariationAllAttribute($post, $field);
                 break;
+            case 'variation-all-attr-with-names':
+                if (!isset($field['args']) || !is_array($field['args'])) {
+                    $field['args'] = array();
+                }
+                $field['args']['show-attr-name'] = 'true';
+                $value = $this->getVariationAllAttribute($post, $field);
+                break;
             case 'product_id_prefix':
                 $value = $this->getProductIdWithPrefix($post, $field);
                 break;
@@ -856,6 +927,9 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
             case 'atum-order-supplier-code':
                 $value = $this->getSupplierCode($post, $field);
                 break;
+            case 'atum-product-location':
+                $value = $this->getAtumProductLocation($post, $field);
+                break;
             case 'pbet-product-expire-date':
                 $value = $this->getPbetProductExpireDate($post, $field);
                 break;
@@ -881,6 +955,9 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
                 $value = $this->wooBookingItemBookingDate($post, $field);
             case 'order-item-consequential-number':
                 $value = $this->getOrderItemConsequentialNumber($post, $field);
+                break;
+            case 'dokan-vendor-name':
+                $value = $this->getDokanVendorName($post, $field);
                 break;
             default:
                 if (
@@ -986,6 +1063,11 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
         return !empty($supplierId) ? get_post_meta($supplierId, '_code', true) : '';
     }
 
+    protected function getAtumProductLocation($post, $field)
+    {
+        return $this->termsObjectsToString(get_the_terms($post, 'atum_location'));
+    }
+
     protected function getAtumInventoryManagementFieldValue($post, $field)
     {
         if (!is_plugin_active('atum-stock-manager-for-woocommerce/atum-stock-manager-for-woocommerce.php')) {
@@ -1080,6 +1162,7 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
     protected function getProductAllParentAttributes($post, $field)
     {
         $separator = isset($field['args']['separator']) ? $field['args']['separator'] : ', ';
+        $showLabel = isset($field['args']['show-attr-name']) && 'true' === $field['args']['show-attr-name'];
         $product = wc_get_product($post->ID);
 
         if (empty($product)) {
@@ -1093,9 +1176,13 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
                     $attributeValue = $metaData->value;
                     if (0 === strpos($metaData->key, 'pa_')) {
                         $option_term = get_term_by('slug', $attributeValue, $metaData->key);
-			$attributeValue = $option_term && ! is_wp_error($option_term) ? str_replace(',', '\\,', $option_term->name) : str_replace(',', '\\,', $attributeValue);
+			            $attributeValue = $option_term && ! is_wp_error($option_term) ? str_replace(',', '\\,', $option_term->name) : str_replace(',', '\\,', $attributeValue);
+                        $taxonomy = get_taxonomy($metaData->key);
+                        $attributeLabel = !empty($taxonomy) ? $taxonomy->labels->singular_name : $metaData->key;
+                    } else {
+                        $attributeLabel = $metaData->key;
                     }
-                    $allAttrsValues[] = $attributeValue;
+                    $allAttrsValues[] = ($showLabel ? $attributeLabel . ': ' : '') . $attributeValue;
                 }
             }
 
@@ -1109,7 +1196,11 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
             });
             $parentNotVariableAttributesOptions = $this->getAttributesOptions($parentNotVariableAttributes);
 
-            return implode($separator, array_filter($parentNotVariableAttributesOptions));
+            $attributesValues = array();
+            foreach ($parentNotVariableAttributesOptions as $attributesOption) {
+                $attributesValues[] = ($showLabel ? ($attributesOption['label'] . ': ') : '') . implode($separator, array_filter($attributesOption['options']));
+            }
+            return implode($separator, $attributesValues);
         } elseif ('product' === $post->post_type) {
             if ('variable' === $product->get_type()) {
                 $parentNotVariableAttributes = array_filter($product->get_attributes(), function($wcAttribute){
@@ -1117,12 +1208,20 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
                 });
                 $parentNotVariableAttributesOptions = $this->getAttributesOptions($parentNotVariableAttributes);
 
-                return implode($separator, array_filter($parentNotVariableAttributesOptions));
+                $attributesValues = array();
+                foreach ($parentNotVariableAttributesOptions as $attributesOption) {
+                    $attributesValues[] = ($showLabel ? ($attributesOption['label'] . ': ') : '') . implode($separator, array_filter($attributesOption['options']));
+                }
+                return implode($separator, $attributesValues);
             } elseif ('simple' === $product->get_type()) {
                 $simpleProductAttributes = $product->get_attributes();
                 $simpleProductAttributesOptions = $this->getAttributesOptions($simpleProductAttributes);
 
-                return implode($separator, array_filter($simpleProductAttributesOptions));
+                $attributesValues = array();
+                foreach ($simpleProductAttributesOptions as $attributesOption) {
+                    $attributesValues[] = ($showLabel ? ($attributesOption['label'] . ': ') : '') . implode($separator, array_filter($attributesOption['options']));
+                }
+                return implode($separator, $attributesValues);
             } else {
                 return '';
             }
@@ -1134,67 +1233,7 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
     protected function getProductAllAttribute($post, $field)
     {
         $separator = isset($field['args']['separator']) ? $field['args']['separator'] : ', ';
-        $product = wc_get_product($post->ID);
-
-        if (empty($product)) {
-            return '';
-        }
-
-        if (isset($post->orderItem)) {
-            $allAttrsValues = array();
-            foreach ($post->orderItem->get_all_formatted_meta_data('') as $metaData) {
-                if (substr($metaData->key, 0, 1) !== '_') {
-                    $attributeValue = $metaData->value;
-                    if (0 === strpos($metaData->key, 'pa_')) {
-                        $option_term = get_term_by('slug', $attributeValue, $metaData->key);
-			$attributeValue = $option_term && ! is_wp_error($option_term) ? str_replace(',', '\\,', $option_term->name) : str_replace(',', '\\,', $attributeValue);
-                    }
-                    $allAttrsValues[] = $attributeValue;
-                }
-            }
-
-            return implode($separator, array_filter($allAttrsValues));
-        } elseif ('product_variation' === $post->post_type) {
-
-            if (!method_exists($product, 'get_variation_attributes')) {
-                return '';
-            }
-
-            $attrsInfo = $product->get_variation_attributes(false);
-            array_walk($attrsInfo, function(&$attribute, $attribute_name) {
-                if (0 === strpos($attribute_name, 'pa_')) {
-                    $option_term = get_term_by('slug', $attribute, $attribute_name);
-                    $attribute = $option_term && ! is_wp_error($option_term)
-                        ? str_replace(',', '\\,', $option_term->name)
-                        : str_replace(',', '\\,', $attribute);
-                }
-            });
-
-            return implode($separator, array_filter($attrsInfo));
-        } elseif ('product' === $post->post_type) {
-            if ('variable' === $product->get_type()) {
-                $parentNotVariableAttributes = array_filter($product->get_attributes(), function($wcAttribute){
-                    return !$wcAttribute->get_variation();
-                });
-                $parentNotVariableAttributesOptions = $this->getAttributesOptions($parentNotVariableAttributes);
-
-                return implode($separator, array_filter($parentNotVariableAttributesOptions));
-            } elseif ('simple' === $product->get_type()) {
-                $simpleProductAttributes = $product->get_attributes();
-                $simpleProductAttributesOptions = $this->getAttributesOptions($simpleProductAttributes);
-
-                return implode($separator, array_filter($simpleProductAttributesOptions));
-            } else {
-                return '';
-            }
-        } else {
-            return '';
-        }
-    }
-
-    protected function getVariationAllAttribute($post, $field)
-    {
-        $separator = isset($field['args']['separator']) ? $field['args']['separator'] : ', ';
+        $showLabel = isset($field['args']['show-attr-name']) && 'true' === $field['args']['show-attr-name'];
         $product = wc_get_product($post->ID);
 
         if (empty($product)) {
@@ -1209,8 +1248,12 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
                     if (0 === strpos($metaData->key, 'pa_')) {
                         $option_term = get_term_by('slug', $attributeValue, $metaData->key);
                         $attributeValue = $option_term && ! is_wp_error($option_term) ? str_replace(',', '\\,', $option_term->name) : str_replace(',', '\\,', $attributeValue);
+                        $taxonomy = get_taxonomy($metaData->key);
+                        $attributeLabel = !empty($taxonomy) ? $taxonomy->labels->singular_name : $metaData->key;
+                    } else {
+                        $attributeLabel = $metaData->key;
                     }
-                    $allAttrsValues[] = $attributeValue;
+                    $allAttrsValues[] = ($showLabel ? $attributeLabel . ': ' : '') . $attributeValue;
                 }
             }
 
@@ -1222,12 +1265,105 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
             }
 
             $attrsInfo = $product->get_variation_attributes(false);
-            array_walk($attrsInfo, function(&$attribute, $attribute_name) {
+
+            array_walk($attrsInfo, function(&$attribute, $attribute_name) use ($showLabel) {
                 if (0 === strpos($attribute_name, 'pa_')) {
                     $option_term = get_term_by('slug', $attribute, $attribute_name);
                     $attribute = $option_term && ! is_wp_error($option_term)
                         ? str_replace(',', '\\,', $option_term->name)
                         : str_replace(',', '\\,', $attribute);
+
+                    $taxonomy = get_taxonomy($attribute_name);
+                    $attributeLabel = !empty($taxonomy) ? $taxonomy->labels->singular_name : $attribute_name;
+                } else {
+                    $attributeLabel = $attribute_name;
+                }
+
+                if ($showLabel && !empty($attribute)) {
+                    $attribute = $attributeLabel . ': ' . $attribute;
+                }
+            });
+
+            return implode($separator, array_filter($attrsInfo));
+        } elseif ('product' === $post->post_type) {
+            if ('variable' === $product->get_type()) {
+                $parentNotVariableAttributes = array_filter($product->get_attributes(), function($wcAttribute){
+                    return !$wcAttribute->get_variation();
+                });
+                $parentNotVariableAttributesOptions = $this->getAttributesOptions($parentNotVariableAttributes);
+
+                $attributesValues = array();
+                foreach ($parentNotVariableAttributesOptions as $attributesOption) {
+                    $attributesValues[] = ($showLabel ? ($attributesOption['label'] . ': ') : '') . implode($separator, array_filter($attributesOption['options']));
+                }
+                return implode($separator, $attributesValues);
+            } elseif ('simple' === $product->get_type()) {
+                $simpleProductAttributes = $product->get_attributes();
+                $simpleProductAttributesOptions = $this->getAttributesOptions($simpleProductAttributes);
+
+                $attributesValues = array();
+                foreach ($simpleProductAttributesOptions as $attributesOption) {
+                    $attributesValues[] = ($showLabel ? ($attributesOption['label'] . ': ') : '') . implode($separator, array_filter($attributesOption['options']));
+                }
+                return implode($separator, $attributesValues);
+            } else {
+                return '';
+            }
+        } else {
+            return '';
+        }
+    }
+
+    protected function getVariationAllAttribute($post, $field)
+    {
+        $separator = isset($field['args']['separator']) ? $field['args']['separator'] : ', ';
+        $showLabel = isset($field['args']['show-attr-name']) && 'true' === $field['args']['show-attr-name'];
+        $product = wc_get_product($post->ID);
+
+        if (empty($product)) {
+            return '';
+        }
+
+        if (isset($post->orderItem)) {
+            $allAttrsValues = array();
+            foreach ($post->orderItem->get_all_formatted_meta_data('') as $metaData) {
+                if (substr($metaData->key, 0, 1) !== '_') {
+                    $attributeValue = $metaData->value;
+                    if (0 === strpos($metaData->key, 'pa_')) {
+                        $option_term = get_term_by('slug', $attributeValue, $metaData->key);
+                        $attributeValue = $option_term && ! is_wp_error($option_term) ? str_replace(',', '\\,', $option_term->name) : str_replace(',', '\\,', $attributeValue);
+                        $taxonomy = get_taxonomy($metaData->key);
+                        $attributeLabel = !empty($taxonomy) ? $taxonomy->labels->singular_name : $metaData->key;
+                    } else {
+                        $attributeLabel = $metaData->key;
+                    }
+                    $allAttrsValues[] = ($showLabel ? $attributeLabel . ': ' : '') . $attributeValue;
+                }
+            }
+
+            return implode($separator, array_filter($allAttrsValues));
+        } elseif ('product_variation' === $post->post_type) {
+
+            if (!method_exists($product, 'get_variation_attributes')) {
+                return '';
+            }
+
+            $attrsInfo = $product->get_variation_attributes(false);
+            array_walk($attrsInfo, function(&$attribute, $attribute_name) use ($showLabel) {
+                if (0 === strpos($attribute_name, 'pa_')) {
+                    $option_term = get_term_by('slug', $attribute, $attribute_name);
+                    $attribute = $option_term && ! is_wp_error($option_term)
+                        ? str_replace(',', '\\,', $option_term->name)
+                        : str_replace(',', '\\,', $attribute);
+
+                    $taxonomy = get_taxonomy($attribute_name);
+                    $attributeLabel = !empty($taxonomy) ? $taxonomy->labels->singular_name : $attribute_name;
+                } else {
+                    $attributeLabel = $attribute_name;
+                }
+
+                if ($showLabel && !empty($attribute)) {
+                    $attribute = $attributeLabel . ': ' . $attribute;
                 }
             });
 
@@ -1242,12 +1378,17 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
         $attributesOptions = array();
 
         foreach ($parentNotVariableAttributes as $parentNotVariableAttribute) {
-            $attributesOptions = array_merge(
-                $attributesOptions,
-                $parentNotVariableAttribute->is_taxonomy()
-                    ? wp_list_pluck($parentNotVariableAttribute->get_terms(), 'name')
-                    : $parentNotVariableAttribute->get_options()
-            );
+            if ($parentNotVariableAttribute->is_taxonomy()) {
+                $attributesOptions[] = array(
+                    'label' => $parentNotVariableAttribute->get_taxonomy_object()->attribute_label,
+                    'options' => wp_list_pluck($parentNotVariableAttribute->get_terms(), 'name'),
+                );
+            } else {
+                $attributesOptions[] = array(
+                    'label' => $parentNotVariableAttribute->get_name(),
+                    'options' => $parentNotVariableAttribute->get_options(),
+                );
+            }
         }
 
         return $attributesOptions;
@@ -1883,28 +2024,43 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
 
     protected function sortByIds($targetArray, $orderArray)
     {
+        $targetArray = array_values($targetArray);
         $foundProductsIds = array();
-        foreach ($targetArray as $product) {
+        foreach ($targetArray as $key => $product) {
             if ('product_variation' === $product->post_type) {
-                $foundProductsIds[] = $product->post_parent;
+                $foundProductsIds[$key] = $product->post_parent;
             } else {
-                $foundProductsIds[] = $product->ID;
+                $foundProductsIds[$key] = $product->ID;
             }
         }
 
+
         if ($orderArray) {
-            $orderArray = array_values(array_intersect($orderArray, $foundProductsIds));
             uksort($targetArray, function ($key1, $key2) use ($orderArray, $foundProductsIds) {
                 $product1Id = $foundProductsIds[$key1];
                 $product2Id = $foundProductsIds[$key2];
 
-                if (array_search($product1Id, $orderArray) > array_search($product2Id, $orderArray)) {
-                    return 1;
-                } else {
+                if (array_search($product1Id, $orderArray) === array_search($product2Id, $orderArray)) {
                     return 0;
+                } else {
+                    return array_search($product1Id, $orderArray) > array_search($product2Id, $orderArray) ? 1 : -1;
                 }
+
             });
         }
+
+        return $targetArray;
+    }
+
+    protected function sortByTitle($targetArray)
+    {
+        usort($targetArray, function($item1, $item2) {
+            if (property_exists($item1, 'post_title') && property_exists($item2, 'post_title')) {
+                return strcmp($item1->post_title, $item2->post_title);
+            } else {
+                return 0;
+            }
+        });
 
         return $targetArray;
     }
@@ -2207,7 +2363,9 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
 
         if ('shop_order' === $post->post_type || 'shop_order_placehold' === $post->post_type) {
             $order = $this->getOrder($post);
-            return !empty($order) ? wp_date($format, strtotime($order->get_date_completed())) : '';
+            return !empty($order) && !empty($order->get_date_completed())
+                ? wp_date($format, strtotime($order->get_date_completed()))
+                : '';
 
 
         } elseif (
@@ -2217,7 +2375,9 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
             && isset($post->orderId)
         ) {
             $order = wc_get_order($post->orderId);
-            return !empty($order) ? wp_date($format, strtotime($order->get_date_completed())) : '';
+            return !empty($order) && !empty($order->get_date_completed())
+                ? wp_date($format, strtotime($order->get_date_completed()))
+                : '';
 
         } else {
             return '';
@@ -2679,5 +2839,16 @@ class WoocommercePostsA4BarcodesMakerFull extends GeneralPostsA4BarcodesMaker
         return property_exists($post, 'orderItemConsequentialNumber')
             ? $post->orderItemConsequentialNumber
             : '';
+    }
+
+    protected function getDokanVendorName($post, $field)
+    {
+        if (!property_exists($post, 'post_author')) {
+            return '';
+        }
+
+        $dokanVendorName = get_user_meta($post->post_author, 'dokan_store_name', true);
+
+        return !empty($dokanVendorName) ? $dokanVendorName : '';
     }
 }

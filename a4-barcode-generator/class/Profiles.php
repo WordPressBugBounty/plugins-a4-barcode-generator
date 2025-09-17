@@ -16,7 +16,7 @@ class Profiles
         $post = array();
         foreach (array(
             'name', 'templateId', 'paperId', 'sheetId', 'update',
-            'barcodeRotate', 'fontSize', 'fontAlgorithm', 'fontLineBreak', 'barcodePosition', 'imageTextGap',
+            'barcodeRotate', 'fontSize', 'fontAlgorithm', 'fontLineBreak', 'barcodePosition', 'imageTextGap', 'sortAlphabetically',
             'barcodeHeightAuto', 'barcodeHeight', 'barcodeWidth', 'basePadding', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft', 'showBarcode'
         ) as $key) {
             if (isset($_POST[$key])) {
@@ -35,6 +35,7 @@ class Profiles
             'update' => 'string',
             'params' => 'array',
             'barcodeRotate' => 'required|numeric',
+            'sortAlphabetically' => 'required|numeric',
             'fontSize' => 'string',
             'fontAlgorithm' => 'required|string',
             'fontLineBreak' => 'required|string',
@@ -81,6 +82,7 @@ class Profiles
                         'sheetId' => $data['sheetId'],
                         'params' => $profileParams,
                         'barcodeRotate' => $data['barcodeRotate'],
+                        'sortAlphabetically' => $data['sortAlphabetically'],
                         'fontSize' => $data['fontSize'],
                         'fontAlgorithm' => $data['fontAlgorithm'],
                         'fontLineBreak' => $data['fontLineBreak'],
@@ -177,6 +179,7 @@ class Profiles
                 'sheetId' => $data['sheetId'],
                 'params' => $profileParams,
                 'barcodeRotate' => $data['barcodeRotate'],
+                'sortAlphabetically' => $data['sortAlphabetically'],
                 'fontSize' => $data['fontSize'],
                 'fontAlgorithm' => $data['fontAlgorithm'],
                 'fontLineBreak' => $data['fontLineBreak'],

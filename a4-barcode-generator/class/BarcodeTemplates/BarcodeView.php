@@ -39,6 +39,6 @@ class BarcodeView
         $w = $h = 250;
 
         $barcodeGenerator = new Generator();
-        echo esc_html($barcodeGenerator->getGeneratedBarcodeSVGFileName($this->code, $this->algorithm, $w, $h, 'black', true));
+        echo $barcodeGenerator->getGeneratedBarcodeSVGFileName($this->code, $this->algorithm, $w, $h, 'black', true);
     }
 }

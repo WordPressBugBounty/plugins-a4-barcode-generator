@@ -2,16 +2,15 @@
 
 namespace UkrSolution\ProductLabelsPrinting;
 
+use UkrSolution\ProductLabelsPrinting\Makers\WoocommercePostsA4BarcodesMaker;
 use UkrSolution\ProductLabelsPrinting\Api\PostsData;
 use UkrSolution\ProductLabelsPrinting\BarcodeTemplates\BarcodeTemplatesController;
 use UkrSolution\ProductLabelsPrinting\BarcodeTemplates\BarcodeView;
-use UkrSolution\ProductLabelsPrinting\Cart\BarcodeCart;
 use UkrSolution\ProductLabelsPrinting\Filters\Items;
 use UkrSolution\ProductLabelsPrinting\Generators\BarcodeImage;
 use UkrSolution\ProductLabelsPrinting\Helpers\UserFieldsMatching;
 use UkrSolution\ProductLabelsPrinting\Helpers\UserSettings;
 use UkrSolution\ProductLabelsPrinting\Helpers\Variables;
-use UkrSolution\ProductLabelsPrinting\Makers\A4BarcodesMaker;
 use UkrSolution\ProductLabelsPrinting\Makers\ManualA4BarcodesMaker;
 use UkrSolution\ProductLabelsPrinting\Makers\TestA4BarcodesMaker;
 use UkrSolution\ProductLabelsPrinting\POS\POS_Orders;
@@ -23,6 +22,7 @@ class Core
     protected $customTemplatesController;
     protected $dimensions;
     protected $updater;
+    protected $woocommerceBarcodesMakerInstance;
 
     public function __construct()
     {
@@ -34,6 +34,7 @@ class Core
 
         add_action('init', function() {
             $this->config = require Variables::$A4B_PLUGIN_BASE_PATH . 'config/config.php';
+            $this->woocommerceBarcodesMakerInstance = new WoocommercePostsA4BarcodesMaker(array());
         }, 1);
 
         add_action('admin_menu', array($this, 'addMenuPages'), 9);
@@ -378,7 +379,7 @@ class Core
             return;
         }
 
-        wp_register_style('import_categories_button_demo', Variables::$A4B_PLUGIN_BASE_URL . 'templates/actions-assets/style.css', false, '3.4.11');
+        wp_register_style('import_categories_button_demo', Variables::$A4B_PLUGIN_BASE_URL . 'templates/actions-assets/style.css', false, '3.4.12');
         wp_enqueue_style('import_categories_button_demo');
 
         wp_enqueue_script('import_buttons_actions_assets', Variables::$A4B_PLUGIN_BASE_URL . 'templates/actions-assets/script.js');
@@ -389,11 +390,11 @@ class Core
         global $wp_version;
         global $current_user;
 
-        wp_enqueue_script("barcode_loader_print", Variables::$A4B_PLUGIN_BASE_URL."assets/js/index-3.4.11-f114ea43.js", array("jquery"), null, true);
-wp_enqueue_script("barcode_api_print", Variables::$A4B_PLUGIN_BASE_URL."assets/js/api-3.4.11-f114ea43.js", array("jquery"), null, true);
-wp_enqueue_style("barcode_core_css_print", Variables::$A4B_PLUGIN_BASE_URL."public/dist/css/app_demo_3.4.11-f114ea43.css", null, null);$appJsPath = Variables::$A4B_PLUGIN_BASE_URL."public/dist/js/app_demo_3.4.11-f114ea43.js";
-$vendorJsPath = Variables::$A4B_PLUGIN_BASE_URL."public/dist/js/chunk-vendors_demo_3.4.11-f114ea43.js";
-$jszip = Variables::$A4B_PLUGIN_BASE_URL."assets/js/jszip.min-3.4.11-f114ea43.js";
+        wp_enqueue_script("barcode_loader_print", Variables::$A4B_PLUGIN_BASE_URL."assets/js/index-3.4.12-4807abb8.js", array("jquery"), null, true);
+wp_enqueue_script("barcode_api_print", Variables::$A4B_PLUGIN_BASE_URL."assets/js/api-3.4.12-4807abb8.js", array("jquery"), null, true);
+wp_enqueue_style("barcode_core_css_print", Variables::$A4B_PLUGIN_BASE_URL."public/dist/css/app_demo_3.4.12-4807abb8.css", null, null);$appJsPath = Variables::$A4B_PLUGIN_BASE_URL."public/dist/js/app_demo_3.4.12-4807abb8.js";
+$vendorJsPath = Variables::$A4B_PLUGIN_BASE_URL."public/dist/js/chunk-vendors_demo_3.4.12-4807abb8.js";
+$jszip = Variables::$A4B_PLUGIN_BASE_URL."assets/js/jszip.min-3.4.12-4807abb8.js";
 
 
         $active_template = $this->customTemplatesController->getActiveTemplate();
@@ -457,14 +458,15 @@ $jszip = Variables::$A4B_PLUGIN_BASE_URL."assets/js/jszip.min-3.4.11-f114ea43.js
             }
         }
 
-        $active_template->shortcodes = A4BarcodesMaker::getTemplateShortcodes($active_template->template);
+        $active_template->shortcodes = array();
+        $this->woocommerceBarcodesMakerInstance->extractTemplateShortcodes($active_template->template, $active_template->shortcodes);
 
         $mainConfig = array(
             'pluginUrl' => Variables::$A4B_PLUGIN_BASE_URL,
             'pluginType' => Variables::$A4B_PLUGIN_TYPE,
             'websiteUrl' => get_bloginfo("url"),
             'adminUrl' => get_admin_url(),
-            'pluginVersion' => '3.4.11',
+            'pluginVersion' => '3.4.12',
             'isWoocommerceActive' => is_plugin_active('woocommerce/woocommerce.php'),
             'isCF7Active' => is_plugin_active('contact-form-7/wp-contact-form-7.php'),
             'isTieredPriceActive' => (is_plugin_active('tier-pricing-table/tier-pricing-table.php') || is_plugin_active('tier-pricing-table-premium/tier-pricing-table.php')),
@@ -617,9 +619,9 @@ $jszip = Variables::$A4B_PLUGIN_BASE_URL."assets/js/jszip.min-3.4.11-f114ea43.js
             : (json_decode(wp_remote_retrieve_body($lastReleaseDataResponse), true) ?: $lastReleaseDataFallback);
 
         $barcodes = [
-            'isLatest' => (int) version_compare('3.4.11', $lastReleaseData['version'], '>='),
+            'isLatest' => (int) version_compare('3.4.12', $lastReleaseData['version'], '>='),
             'latest' => $lastReleaseData['version'], 
-            'version' => '3.4.11',
+            'version' => '3.4.12',
             'downloadUrl' => $lastReleaseData['url'],
             'pluginUrl' => Variables::$A4B_PLUGIN_BASE_URL,
             'type' => strtolower(Variables::$A4B_PLUGIN_PLAN),
@@ -667,7 +669,9 @@ $jszip = Variables::$A4B_PLUGIN_BASE_URL."assets/js/jszip.min-3.4.11-f114ea43.js
                 $template->uol_id = $activeDimension;
             }
 
-            $template->shortcodes = A4BarcodesMaker::getTemplateShortcodes($template->template);
+
+            $template->shortcodes = array();
+            $this->woocommerceBarcodesMakerInstance->extractTemplateShortcodes($template->template, $template->shortcodes);
         }
 
         if ($isAjax === false) {
@@ -702,7 +706,7 @@ $jszip = Variables::$A4B_PLUGIN_BASE_URL."assets/js/jszip.min-3.4.11-f114ea43.js
     protected function enqueueTemplatesAssets()
     {
         if ('BASIC' !== Variables::$A4B_PLUGIN_PLAN) {
-            wp_enqueue_script('barcode_template_preview', Variables::$A4B_PLUGIN_BASE_URL . 'assets/js/barcode_template_preview-3.4.11-f114ea43.js', array('jquery'), null, true);
+            wp_enqueue_script('barcode_template_preview', Variables::$A4B_PLUGIN_BASE_URL . 'assets/js/barcode_template_preview-3.4.12-4807abb8.js', array('jquery'), null, true);
             wp_localize_script('barcode_templates', 'a4bBarcodeTemplates', array('pluginUrl' => Variables::$A4B_PLUGIN_BASE_URL));
 
             wp_enqueue_style('codemirror', Variables::$A4B_PLUGIN_BASE_URL . 'assets/js/codemirror/codemirror.css', array(), false);

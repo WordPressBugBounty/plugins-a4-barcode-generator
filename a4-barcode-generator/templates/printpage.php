@@ -9,7 +9,7 @@ use UkrSolution\ProductLabelsPrinting\Helpers\Variables;
 <head>
     <title>Print page</title>
     <?php $allowedTags = array('link' => array('rel' => 1, 'type' => 1, 'href' => 1)); ?>
-<?php echo wp_kses(implode(USWBG_print_lStylePath('public/dist/css/app_demo_3.4.11-f114ea43.css')), $allowedTags); ?>
+<?php echo wp_kses(implode(USWBG_print_lStylePath('public/dist/css/app_demo_3.4.12-4807abb8.css')), $allowedTags); ?>
 
     <style>
         html,
@@ -77,10 +77,10 @@ use UkrSolution\ProductLabelsPrinting\Helpers\Variables;
         window.a4bjs.uid = '<?php echo esc_js($uid); ?>';
     </script>
     <script src='<?php echo esc_attr(A4B_SITE_BASE_URL . '/wp-includes/js/jquery/jquery.js'); ?>'></script>
-    <script src='<?php echo esc_attr(Variables::$A4B_PLUGIN_BASE_URL . 'assets/js/jszip.min-3.4.11-f114ea43.js'); ?>'></script>
-<script src='<?php echo esc_attr(Variables::$A4B_PLUGIN_BASE_URL . 'assets/js/api-3.4.11-f114ea43.js'); ?>'></script>
-<script src='<?php echo esc_attr(Variables::$A4B_PLUGIN_BASE_URL . 'public/dist/js/app_demo_3.4.11-f114ea43.js'); ?>'></script>
-<script src='<?php echo esc_attr(Variables::$A4B_PLUGIN_BASE_URL . 'public/dist/js/chunk-vendors_demo_3.4.11-f114ea43.js'); ?>'></script>
+    <script src='<?php echo esc_attr(Variables::$A4B_PLUGIN_BASE_URL . 'assets/js/jszip.min-3.4.12-4807abb8.js'); ?>'></script>
+<script src='<?php echo esc_attr(Variables::$A4B_PLUGIN_BASE_URL . 'assets/js/api-3.4.12-4807abb8.js'); ?>'></script>
+<script src='<?php echo esc_attr(Variables::$A4B_PLUGIN_BASE_URL . 'public/dist/js/app_demo_3.4.12-4807abb8.js'); ?>'></script>
+<script src='<?php echo esc_attr(Variables::$A4B_PLUGIN_BASE_URL . 'public/dist/js/chunk-vendors_demo_3.4.12-4807abb8.js'); ?>'></script>
 </body>
 
 </html>

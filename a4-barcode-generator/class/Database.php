@@ -177,6 +177,7 @@ class Database
             `sheetId` int(10) DEFAULT NULL,
             `params` LONGTEXT DEFAULT NULL,
             `barcodeRotate` tinyint(1) DEFAULT 0,
+            `sortAlphabetically` tinyint(1) DEFAULT 0,
             `fontSize` varchar(255) DEFAULT '',
             `fontAlgorithm` varchar(255) DEFAULT 'auto',
             `fontLineBreak` varchar(255) DEFAULT 'word',

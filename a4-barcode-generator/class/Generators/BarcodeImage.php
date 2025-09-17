@@ -68,6 +68,11 @@ class BarcodeImage
 
     public function parseHash($hash, $fileData = array())
     {
+        if (!function_exists("imagecreate")) {
+            echo "GD not even installed.";
+            return;
+        }
+
         $customTemplates = new BarcodeTemplatesController();
 
         $json = isset($hash) ? base64_decode($hash) : "[]";
@@ -160,7 +165,7 @@ class BarcodeImage
 
             $svg = $barcodeGenerator->getGeneratedBarcodeSVGFileName($code, $algorithm, $barcodeWidth, $barcodeHeight, 'black', true);
             $svg2png = SVG::fromString($svg);
-            $png = $svg2png->toRasterImage($barcodeWidth, $barcodeHeight);
+            $png = $svg2png->toRasterImage((int) $barcodeWidth, (int) $barcodeHeight);
 
             Variables::initCodes($this, array(
                 json_decode(Variables::getString(Variables::$codePref)),
@@ -169,9 +174,9 @@ class BarcodeImage
             ));
 
             if ($width && $height) {
-                $image = $this->createImage($width, $height);
+                $image = $this->createImage((int) $width, (int) $height);
             } else {
-                $image = $this->createImage($template->width, $template->height);
+                $image = $this->createImage((int) $template->width, (int) $template->height);
             }
 
             $this->addBarcode($image, $png, $barcodeAttributes, $templateId);
@@ -277,7 +282,7 @@ class BarcodeImage
             $y = - ($barcodeHeight * 0.45);
         }
 
-        imagecopymerge($image, $barcode, $x, $y, 0, 0, $barcodeWidth, $barcodeHeight, 100);
+        imagecopymerge($image, $barcode, (int)$x, (int)$y, 0, 0, (int)$barcodeWidth, (int)$barcodeHeight, 100);
     }
 
     public function fillLines(&$image, $lines, $templateType, $algorithm)
@@ -335,7 +340,8 @@ class BarcodeImage
 
         $x = $position['x'];
         $y = $position['y'] > 0 ? $this->zoomY * $position['y'] : $position['y'];
-        imagettftext($image, $fontSize, 0, $x, $y, $textColor, $font, $text);
+        imagettftext($image, $fontSize, 0, (int)$x, (int)$y, $textColor, $font, $text);
+
     }
 
     private function getLinePosition($templateType, $line)

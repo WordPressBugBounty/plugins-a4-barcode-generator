@@ -257,7 +257,7 @@ class Settings
 
             if (isset($data['lken'])) {
                 $prefix = 'ukrsolution_upgrade_print_barcodes_';
-                @delete_transient($prefix . '3.4.11');
+                @delete_transient($prefix . '3.4.12');
             }
 
             foreach ($data as $param => $value) {

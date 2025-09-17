@@ -3,13 +3,13 @@
 Plugin Name: Barcode Label Printing for WooCommerce and others plugins - (demo)
 Description: Create and Print barcodes on label sheets using a printer. Best tool to make inventory of your stock.
 Text Domain: wpbcu-barcode-generator
-Version: 3.4.11
+Version: 3.4.12
 Author: UkrSolution
 Plugin URI: https://www.ukrsolution.com/Joomla/A4-BarCode-Generator-For-Wordpress
 Author URI: http://www.ukrsolution.com
 License: GPL2
 WC requires at least: 4.0.0
--WC tested up to: 9.4.*
+-WC tested up to: 10.1.*
  */
 
 
@@ -125,9 +125,9 @@ if (is_admin() || $load_on_frontend == true || $load_on_url == true) {
         $pluginName = UkrSolution\ProductLabelsPrinting\Helpers\Variables::$A4B_PLUGIN_BASE_NAME;
 
         $lastVersion = get_option("active-print-barcodes-version", "");
-        if ($lastVersion !== "3.4.11") {
+        if ($lastVersion !== "3.4.12") {
             UkrSolution\ProductLabelsPrinting\Database::createTables();
-            update_option("active-print-barcodes-version", "3.4.11");
+            update_option("active-print-barcodes-version", "3.4.12");
         }
     });
 

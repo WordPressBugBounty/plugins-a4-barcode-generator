@@ -47,7 +47,7 @@ class SVGRasterizer
 
     private static function createImage($width, $height, $background)
     {
-        $img = imagecreatetruecolor($width, $height);
+        $img = imagecreatetruecolor((int)$width, (int)$height);
 
         imagealphablending($img, true);
         imagesavealpha($img, true);

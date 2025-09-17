@@ -55,10 +55,11 @@ class RectRenderer extends Renderer
             return;
         }
 
+
         imagefilledrectangle(
             $image,
-            $params['x1'], $params['y1'],
-            $params['x2'], $params['y2'],
+            (int)$params['x1'], (int)$params['y1'],
+            (int)$params['x2'], (int)$params['y2'],
             $color
         );
     }

@@ -69,6 +69,7 @@ return array(
     'type_field_label' => __('Type', 'wpbcu-barcode-generator'),
     'include_variations_field_label' => __('Include variations', 'wpbcu-barcode-generator'),
     'use_stock_quantity_field_label' => __('Use stock quantity', 'wpbcu-barcode-generator'),
+    'sort_alphabetically_field_label' => __('Sort alphabetically', 'wpbcu-barcode-generator'),
 
     'select_template' => __('Select template:', 'wpbcu-barcode-generator'),
     'placeholder_field_template' => __('Select template', 'wpbcu-barcode-generator'),
@@ -403,14 +404,14 @@ return array(
         __('Attributes:', 'wpbcu-barcode-generator') => array(
             __('Attributes example:', 'wpbcu-barcode-generator') => '[attr=Color], [attr=Size]',
             __('Get attribute of parent:', 'wpbcu-barcode-generator') => '[attr=parent.Color]',
-            __("All Product's Attributes:", 'wpbcu-barcode-generator') => '[product-all-attr separator=", "]',
-            __('All Parent Attributes:', 'wpbcu-barcode-generator') => '[product-all-parent-attributes separator=", "]',
+            __("All Product's Attributes:", 'wpbcu-barcode-generator') => '[product-all-attr separator=", " show-attr-name="true"]',
+            __('All Parent Attributes:', 'wpbcu-barcode-generator') => '[product-all-parent-attributes separator=", " show-attr-name="true"]',
             __('<i>"Color" and "Size" are actual names of attributes, please replace them to your attribute names.</i>', 'wpbcu-barcode-generator') => '',
         ),
         __('For variations only:', 'wpbcu-barcode-generator') => array(
             __('Parent product ID:', 'wpbcu-barcode-generator') => '[field=parent.ID]',
             __('Parent product SKU:', 'wpbcu-barcode-generator') => '[cf=parent._sku]',
-            __("All Variation�s Attributes:", 'wpbcu-barcode-generator') => '[variation-all-attr separator=", "]',
+            __("All Variation�s Attributes:", 'wpbcu-barcode-generator') => '[variation-all-attr separator=", " show-attr-name="true"]',
         ),
         __('Date & time:', 'wpbcu-barcode-generator') => array(
             __('Date of product creation:', 'wpbcu-barcode-generator') => '[creation-date]',
@@ -614,6 +615,7 @@ return array(
             __('Add list of products:', 'wpbcu-barcode-generator') => '[product-list-start test-products=1]<br/>// Add product  shortcodes &<br/>// HTML here<br/>[product-list-end]',
             __('Order item quantity:', 'wpbcu-barcode-generator') => '[order-product-qty]',
             __("Get product's meta data:", 'wpbcu-barcode-generator') => '[atum-order-item-meta-field=Size]',
+            __("Atum product location:", 'wpbcu-barcode-generator') => '[atum-product-location]',
         ),
     ),
 
@@ -851,6 +853,7 @@ return array(
     'field_71' => __("Created date", 'wpbcu-barcode-generator'),
     'field_72' => __("Cart tax", 'wpbcu-barcode-generator'),
     'field_73' => __("All Product's Attributes", 'wpbcu-barcode-generator'),
+    'field_85' => __("All Product's Attributes (with names)", 'wpbcu-barcode-generator'),
     'field_74' => __("Order item quantity", 'wpbcu-barcode-generator'),
     'field_75' => __("Sale Price + Tax", 'wpbcu-barcode-generator'),
     'field_76' => __("Barcode", 'wpbcu-barcode-generator'),
@@ -861,6 +864,7 @@ return array(
     'field_81' => __("Order user display name", 'wpbcu-barcode-generator'),
     'field_82' => __("Order coupon", 'wpbcu-barcode-generator'),
     'field_83' => __("All Parent Attributes", 'wpbcu-barcode-generator'),
+    'field_84' => __("Dokan vendor name", 'wpbcu-barcode-generator'),
 
     'shipping_info' => __("Shipping info", 'wpbcu-barcode-generator'),
     'billing_info' => __("Billing info", 'wpbcu-barcode-generator'),

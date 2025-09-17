@@ -55,7 +55,7 @@ class WooCommerce
         $activeTemplate = $customTemplatesController->getActiveTemplate();
 
         $post = array();
-        foreach (array('format', 'withVariations', 'isImportSingleVariation', 'isUseApi', 'lineSeparator1', 'lineSeparator2', 'lineSeparator3', 'lineSeparator4', 'page', 'profileId') as $key) {
+        foreach (array('format', 'withVariations', 'isImportSingleVariation', 'isUseApi', 'lineSeparator1', 'lineSeparator2', 'lineSeparator3', 'lineSeparator4', 'page', 'profileId', 'sortAlphabetically') as $key) {
             if (isset($_POST[$key])) {
                 $post[$key] = sanitize_text_field($_POST[$key]);
             }
@@ -73,6 +73,7 @@ class WooCommerce
             'fieldSepLine3',
             'fieldSepLine4',
             'options',
+            'existingIds',
         ) as $key) {
             if (isset($_POST[$key])) {
                 $post[$key] = USWBG_a4bRecursiveSanitizeTextField($_POST[$key]);
@@ -84,8 +85,8 @@ class WooCommerce
         }
 
         $validationRules = array(
-            'productsCategories' => 'requiredItem:if_empty,productsIds|array|bail', 
-            'productsIds' => 'requiredItem:if_empty,productsCategories|array|bail', 
+            'productsCategories' => 'array',
+            'productsIds' => 'array',
             'lineBarcode' => $activeTemplate->code_match || (!empty($activeTemplate->matchingType) && !empty($activeTemplate->matching->lineBarcode)) ? 'array' : 'required|array',
             'fieldLine1' => 'array',
             'fieldLine2' => 'array',
@@ -106,6 +107,8 @@ class WooCommerce
             'page' => 'string',
             'profileId' => 'numeric',
             'options' => 'array',
+            'sortAlphabetically' => 'numeric',
+            'existingIds' => 'array',
         );
 
         $data = Validator::create($post, $validationRules, true)->validate();
@@ -137,7 +140,7 @@ class WooCommerce
         $activeTemplate = $customTemplatesController->getActiveTemplate();
 
         $post = array();
-        foreach (array('format', 'withVariations', 'isImportSingleVariation', 'isUseApi', 'lineSeparator1', 'lineSeparator2', 'lineSeparator3', 'lineSeparator4', 'page', 'profileId') as $key) {
+        foreach (array('format', 'withVariations', 'isImportSingleVariation', 'isUseApi', 'lineSeparator1', 'lineSeparator2', 'lineSeparator3', 'lineSeparator4', 'page', 'profileId', 'sortAlphabetically') as $key) {
             if (isset($_POST[$key])) {
                 $post[$key] = sanitize_text_field($_POST[$key]);
             }
@@ -154,6 +157,7 @@ class WooCommerce
             'fieldSepLine2',
             'fieldSepLine3',
             'fieldSepLine4',
+            'existingIds',
         ) as $key) {
             if (isset($_POST[$key])) {
                 $post[$key] = USWBG_a4bRecursiveSanitizeTextField($_POST[$key]);
@@ -165,8 +169,8 @@ class WooCommerce
         }
 
         $validationRules = array(
-            'productsCategories' => 'requiredItem:if_empty,productsIds|array|bail', 
-            'productsIds' => 'requiredItem:if_empty,productsCategories|array|bail', 
+            'productsCategories' => 'array', 
+            'productsIds' => 'array', 
             'lineBarcode' => $activeTemplate->code_match ? 'array' : 'required|array',
             'fieldLine1' => 'array',
             'fieldLine2' => 'array',
@@ -186,6 +190,8 @@ class WooCommerce
             'template' => 'html',
             'page' => 'string',
             'profileId' => 'numeric',
+            'sortAlphabetically' => 'numeric',
+            'existingIds' => 'array',
         );
 
         $data = Validator::create($post, $validationRules, true)->validate();
@@ -377,7 +383,7 @@ class WooCommerce
 
         global $current_user;
         $post = array();
-        foreach (array('format', 'orderQuantity', 'useStockQuantity', 'isUseApi', 'lineSeparator1', 'lineSeparator2', 'lineSeparator3', 'lineSeparator4', 'profileId', 'page') as $key) {
+        foreach (array('format', 'orderQuantity', 'useStockQuantity', 'isUseApi', 'lineSeparator1', 'lineSeparator2', 'lineSeparator3', 'lineSeparator4', 'profileId', 'page', 'sortAlphabetically') as $key) {
             if (isset($_POST[$key])) {
                 $post[$key] = sanitize_text_field($_POST[$key]);
             }
@@ -394,6 +400,7 @@ class WooCommerce
             'fieldSepLine2',
             'fieldSepLine3',
             'fieldSepLine4',
+            'existingIds',
         ) as $key) {
             if (isset($_POST[$key])) {
                 $post[$key] = USWBG_a4bRecursiveSanitizeTextField($_POST[$key]);
@@ -408,8 +415,8 @@ class WooCommerce
         }
 
         $validationRules = array(
-            'ordersCategories' => 'requiredItem:if_empty,ordersIds|array|bail', 
-            'ordersIds' => 'requiredItem:if_empty,ordersCategories|array|bail', 
+            'ordersCategories' => 'array',
+            'ordersIds' => 'array',
             'lineBarcode' => $activeTemplate->code_match ? 'array' : 'required|array',
             'fieldLine1' => 'array',
             'fieldLine2' => 'array',
@@ -429,6 +436,8 @@ class WooCommerce
             'template' => 'html',
             'page' => 'string',
             'profileId' => 'numeric',
+            'sortAlphabetically' => 'numeric',
+            'existingIds' => 'array',
         );
 
         $data = Validator::create($post, $validationRules, true)->validate();
@@ -509,7 +518,7 @@ class WooCommerce
         global $current_user;
 
         $post = array();
-        foreach (array('format', 'orderQuantity', 'useStockQuantity', 'isUseApi', 'lineSeparator1', 'lineSeparator2', 'lineSeparator3', 'lineSeparator4', 'profileId', 'page') as $key) {
+        foreach (array('format', 'orderQuantity', 'useStockQuantity', 'isUseApi', 'lineSeparator1', 'lineSeparator2', 'lineSeparator3', 'lineSeparator4', 'profileId', 'page', 'sortAlphabetically') as $key) {
             if (isset($_POST[$key])) {
                 $post[$key] = sanitize_text_field($_POST[$key]);
             }
@@ -527,6 +536,7 @@ class WooCommerce
             'fieldSepLine3',
             'fieldSepLine4',
             'itemsIds',
+            'existingIds',
         ) as $key) {
             if (isset($_POST[$key])) {
                 $post[$key] = USWBG_a4bRecursiveSanitizeTextField($_POST[$key]);
@@ -537,8 +547,8 @@ class WooCommerce
         $activeTemplate = $customTemplatesController->getActiveTemplate();
 
         $validationRules = array(
-            'ordersCategories' => 'requiredItem:if_empty,ordersIds|array|bail', 
-            'ordersIds' => 'requiredItem:if_empty,ordersCategories|array|bail', 
+            'ordersCategories' => 'array',
+            'ordersIds' => 'array',
             'lineBarcode' => $activeTemplate->code_match ? 'array' : 'required|array',
             'fieldLine1' => 'array',
             'fieldLine2' => 'array',
@@ -558,6 +568,8 @@ class WooCommerce
             'lineSeparator4' => 'string',
             'page' => 'string',
             'profileId' => 'numeric',
+            'sortAlphabetically' => 'numeric',
+            'existingIds' => 'array',
         );
 
         $data = Validator::create($post, $validationRules, true)->validate();

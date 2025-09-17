@@ -70,6 +70,7 @@ class PostsUtils
     {
         $value = (int)$value;
         return uswbg_a4bGetPosts(array(
+            'post_type' => array('product', 'product_variation'),
             'post__in' => empty($value) ? array(0) : array($value),
             'fields' => 'ids',
         ));

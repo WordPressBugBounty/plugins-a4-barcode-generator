@@ -466,6 +466,7 @@ abstract class A4BarcodesMaker
             'main_gallery',
             'product-all-parent-attributes',
             'variation-all-attr',
+            'variation-all-attr-with-names',
             'product-all-attr',
             'product_id_prefix',
 
@@ -485,6 +486,7 @@ abstract class A4BarcodesMaker
             'atum-order-item-meta-field',
             'atum-order-supplier-name',
             'atum-order-supplier-code',
+            'atum-product-location',
 
             'pbet-product-expire-date',
             'pbet-product-batch',
@@ -496,6 +498,8 @@ abstract class A4BarcodesMaker
             'yoast-mpn',
 
             'woo-booking_item-booking-date',
+
+            'dokan-vendor-name'
         );
 
         $shortcodesTagsList = apply_filters('barcode_generator_register_shortcodes_hook', $shortcodesTagsList);
@@ -578,12 +582,4 @@ abstract class A4BarcodesMaker
             : $result;
     }
 
-    public static function getTemplateShortcodes($template)
-    {
-        $shortcodesArgs = array();
-        $barcodesGenerator = new WoocommercePostsA4BarcodesMaker(array());
-        $barcodesGenerator->extractTemplateShortcodes($template, $shortcodesArgs);
-
-        return $shortcodesArgs;
-    }
 }

@@ -20,12 +20,13 @@ class TextRenderer extends Renderer
     {
         $font_path = dirname(__FILE__) . "/../../../../../../assets/fonts/arial.ttf";
 
+
         imagettftext(
             $image,
             $params['size'] * 0.8,
             0,
-            $params['x'],
-            $params['y'],
+            (int) $params['x'],
+            (int) $params['y'],
             $color,
             $font_path, 
             $params['text']

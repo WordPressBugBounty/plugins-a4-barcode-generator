@@ -48,7 +48,7 @@ abstract class Renderer
     private function getPaintOrder(SVGNode $context)
     {
         $paintOrder = $context->getComputedStyle('paint-order');
-        $paintOrder = preg_replace('#\s{2,}#', ' ', trim($paintOrder));
+        $paintOrder = preg_replace('#\s{2,}#', ' ', trim(is_string($paintOrder) ? $paintOrder : ''));
 
         $defaultOrder = array('fill', 'stroke', 'markers');
 

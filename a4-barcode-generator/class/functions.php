@@ -24,7 +24,7 @@ if (!function_exists('uswbg_a4bGetPostsByCategories')) {
             'tax_query'      => array(
                 array(
                     'taxonomy' => 'product_cat',
-                    'terms'    => $categoriesIds,
+                    'terms'    => !empty($categoriesIds) ? $categoriesIds : array(0),
                     'field'    => 'term_id',
                     'operator' => 'IN',
                 ),
@@ -50,6 +50,11 @@ if (!function_exists('uswbg_a4bGetPosts')) {
         );
 
         $args = array_merge($defaultArgs, $args);
+
+        if (is_plugin_active('polylang/polylang.php')) {
+            unset($args['lang']);
+        }
+
         $query = new \WP_Query($args);
 
         return $query->posts;

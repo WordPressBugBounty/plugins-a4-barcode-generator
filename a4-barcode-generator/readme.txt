@@ -2,7 +2,7 @@
 Contributors: UkrSolution <https://profiles.wordpress.org/ukrsolution>
 Tags: barcode, label, print, upc, ean
 Requires at least: 4.0.1 
-Tested up to: 6.7
+Tested up to: 6.8
 Stable tag: trunk
 Requires PHP: 5.6
 License: GPLv2 or later 
